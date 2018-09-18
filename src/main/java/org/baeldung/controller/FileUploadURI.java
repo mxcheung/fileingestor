@@ -20,6 +20,8 @@ public final class FileUploadURI {
 
     public static final String POST_FILE_DOWNLOAD_MAPPING = "/fileDownload";
     
+    public static final String POST_FORWARD_MAPPING = "/fileforward";
+    
     private FileUploadURI() {
     }
 

@@ -1,9 +1,16 @@
 package org.baeldung.service;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.io.IOUtils;
 import org.baeldung.BatchDTO;
 import org.baeldung.FileDTO;
 import org.baeldung.FileStatusType;
@@ -67,6 +74,37 @@ public class FileStoreAndFowardService {
         return fileEntity;
     }
 
+    
+    public FileEntity forwardFile(MultipartFile multipartFile, String targetFolder, String targetFileName) throws IOException {
+        String originalFileName = multipartFile.getOriginalFilename();
+        LOGGER.info("Storing file {}", originalFileName);
+        byte[] byteArr = null;
+        byteArr = multipartFile.getBytes();
+        FileEntity fileEntity = new FileEntity();
+        fileEntity.setOriginalFileName(originalFileName);
+        byte[] compressedData = FileUtil.gzipCompress(byteArr);
+        String targetPath = targetFolder + "//" + originalFileName;
+        File targetFile = new File(targetPath);
+        OutputStream outStream = new FileOutputStream(targetFile);
+        outStream.write(compressedData);
+        outStream.close();
+        return fileEntity;
+    }
+
+
+    public byte[] getFile(String targetFolder, String targetFileName) throws IOException {
+        LOGGER.info("Getting file {}", targetFileName);
+        String targetPath = targetFolder + "//" + targetFileName;
+        File targetFile = new File(targetPath);
+        InputStream is = new FileInputStream(targetFile);
+        byte[] compressedData = IOUtils.toByteArray(is);
+        byte[] uncompressedData = FileUtil.gzipUncompress(compressedData);
+        return uncompressedData;
+    }
+
+
+    
+    
     public String getFileStatus(boolean storeAndFwd) {
         String status = storeAndFwd ? QUEUED : STORED;
         return status;
